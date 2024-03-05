@@ -1,5 +1,13 @@
+import { Toaster } from "react-hot-toast";
+import FormValidation from "./components/FormValidation";
+
 const App = () => {
-  return <div className="text-4xl text-center font-bold">App</div>;
+  return (
+    <>
+      <FormValidation />
+      <Toaster position="top-right" reverseOrder={false} />
+    </>
+  );
 };
 
 export default App;
