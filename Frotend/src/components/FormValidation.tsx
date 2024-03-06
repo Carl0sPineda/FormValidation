@@ -1,35 +1,35 @@
 import { useForm } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Register } from "../interface/user.interface";
 import { useRegisterUser } from "../hooks/mutations/user.mutations";
+import { useState } from "react";
 
-const UserSchema = yup.object().shape({
-  name: yup
+const UserSchema = z.object({
+  name: z
     .string()
+    .trim()
+    .regex(/^[^<>&]*$/, "Scripts or special characters are not allowed")
     .min(6, "The name must be at least 6 characters")
-    .max(20, "Name must be less than 20 characters")
-    .matches(/^[^<>&]*$/, "Scripts or special characters are not allowed")
-    .required("Name is required"),
-  email: yup
+    .max(20, "Name must be less than 20 characters"),
+  email: z.string().email("Please enter a valid email"),
+  password: z
     .string()
-    .email("Please enter a valid email")
-    .required("Email is required"),
-  password: yup
-    .string()
+    .trim()
+    .regex(/^[^<>&]*$/, "Scripts or special characters are not allowed")
     .min(6, "Must be at least 6 characters")
-    .max(20, "Must be less than 20 characters")
-    .matches(/^[^<>&]*$/, "Scripts or special characters are not allowed")
-    .required("Password is required"),
-  age: yup
-    .number()
+    .max(20, "Must be less than 20 characters"),
+  age: z
+    .number({
+      invalid_type_error: "Age is required",
+      required_error: "Age is required",
+    })
     .min(18, "Age must be at least 18")
-    .max(120, "Age cannot be greater than 120")
-    .typeError("Age is required")
-    .required(),
+    .max(120, "Age cannot be greater than 120"),
 });
 
 const FormValidation = () => {
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const registerMutation = useRegisterUser();
   const {
     register,
@@ -37,14 +37,18 @@ const FormValidation = () => {
     formState: { errors },
     reset,
   } = useForm<Register>({
-    resolver: yupResolver(UserSchema),
+    resolver: zodResolver(UserSchema),
   });
 
   const onSubmit = async (data: Register) => {
     try {
+      setIsSubmitting(true);
       await registerMutation.mutateAsync(data);
       reset();
-    } catch (error) {}
+    } catch (error) {
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -130,8 +134,11 @@ const FormValidation = () => {
         </div>
 
         {/* Botón de envío del formulario */}
-        <button className="w-full py-2 px-4 bg-slate-800 text-white font-semibold rounded-md hover:bg-slate-900 cursor-pointer">
-          Submit
+        <button
+          className="w-full py-2 px-4 bg-slate-800 text-white font-semibold rounded-md hover:bg-slate-900 cursor-pointer disabled:opacity-50"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Submitting..." : "Submit"}
         </button>
       </form>
     </>
