@@ -9,6 +9,7 @@ const UserSchema = yup.object().shape({
     .string()
     .min(6, "The name must be at least 6 characters")
     .max(20, "Name must be less than 20 characters")
+    .matches(/^[^<>&]*$/, "Scripts or special characters are not allowed")
     .required("Name is required"),
   email: yup
     .string()
@@ -18,6 +19,7 @@ const UserSchema = yup.object().shape({
     .string()
     .min(6, "Must be at least 6 characters")
     .max(20, "Must be less than 20 characters")
+    .matches(/^[^<>&]*$/, "Scripts or special characters are not allowed")
     .required("Password is required"),
   age: yup
     .number()
