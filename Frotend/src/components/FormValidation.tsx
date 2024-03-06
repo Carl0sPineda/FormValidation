@@ -1,24 +1,30 @@
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { Register } from "../interface/user.interface";
 import { useRegisterUser } from "../hooks/mutations/user.mutations";
 
-const UserSchema = z.object({
-  name: z
+const UserSchema = yup.object().shape({
+  name: yup
     .string()
     .min(6, "The name must be at least 6 characters")
-    .max(20, "Name must be less than 20 characters"),
-  email: z.string().email("Please enter a valid email"),
-  password: z
+    .max(20, "Name must be less than 20 characters")
+    .required("Name is required"),
+  email: yup
+    .string()
+    .email("Please enter a valid email")
+    .required("Email is required"),
+  password: yup
     .string()
     .min(6, "Must be at least 6 characters")
-    .max(20, "Must be less than 20 characters"),
-  age: z
+    .max(20, "Must be less than 20 characters")
+    .required("Password is required"),
+  age: yup
     .number()
-    .positive("Age must be a positive number")
     .min(18, "Age must be at least 18")
-    .max(120, "Age cannot be greater than 120"),
+    .max(120, "Age cannot be greater than 120")
+    .typeError("Age is required")
+    .required(),
 });
 
 const FormValidation = () => {
@@ -29,7 +35,7 @@ const FormValidation = () => {
     formState: { errors },
     reset,
   } = useForm<Register>({
-    resolver: zodResolver(UserSchema),
+    resolver: yupResolver(UserSchema),
   });
 
   const onSubmit = async (data: Register) => {
